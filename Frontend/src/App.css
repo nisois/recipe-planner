@@ -31,3 +31,8 @@
     transform: rotate(360deg);
   }
 }
+
+.MealOrSide button {
+  padding: 7px 10px;
+  background-color: #fff;
+}

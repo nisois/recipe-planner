@@ -8,9 +8,9 @@ app.use(express.json());
 connect();
 
 app.post("/addRecipe", async function(req, res) {
-  console.log(req.body);
   let newRecipe = {
-    name: req.body.title,
+    title: req.body.title,
+    type: req.body.type,
     url: req.body.url,
     tags: req.body.tags,
     comment: req.body.comment
@@ -22,8 +22,12 @@ app.post("/addRecipe", async function(req, res) {
   return res.status(200).send({ success: true });
 });
 
-app.get("/allRecipe", function(req, res) {
-  res.send("Hello world!");
+app.get("/allRecipes", async function(req, res) {
+  const foundRecipes = await recipes()
+    .find()
+    .toArray();
+
+  return res.status(200).send(foundRecipes);
 });
 
 app.listen(4000, function() {
