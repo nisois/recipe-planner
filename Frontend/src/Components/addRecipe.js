@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Card, Label, Form } from "semantic-ui-react";
+import { Label, Form, Input } from "semantic-ui-react";
 import axios from "axios";
 import { connect } from "react-redux";
 import {
@@ -50,7 +50,7 @@ class AddRecipe extends Component {
     }
 
     return (
-      <Form>
+      <Form size="large">
         <Form.Input
           fluid
           value={this.props.recipe.title}
@@ -65,15 +65,22 @@ class AddRecipe extends Component {
           placeholder="Link to the recipe"
           onChange={this.handleUrlChange}
         />
-        <Form.Input
-          fluid
-          value={this.props.recipe.tag}
-          label="Tags"
-          placeholder="Add a tag (maximum 3)"
-          onChange={this.handleTagChange}
-        />
-        <Form.Button onClick={this.handleTagSubmit}>Add Tag</Form.Button>
-        {formatedTagsArr}
+        <Form.Field style={{ marginBottom: "0px" }}>
+          <label>Tags</label>
+        </Form.Field>
+        <Form.Group inline widths="equal">
+          <Form.Input
+            fluid
+            value={this.props.recipe.tag}
+            // label="Tags"
+            placeholder="Add a tag (maximum 3)"
+            onChange={this.handleTagChange}
+          />
+          <Form.Button label="" onClick={this.handleTagSubmit}>
+            Add Tag
+          </Form.Button>
+        </Form.Group>
+        <Form.Field>{formatedTagsArr}</Form.Field>
         <Form.Group inline>
           <Form.Radio
             label="Meal"
