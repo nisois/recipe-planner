@@ -19,7 +19,9 @@ app.post("/addRecipe", async function(req, res) {
   db.insertOne(newRecipe, (err, result) => {
     if (err) return res.status(500).send(err);
   });
-  return res.status(200).send({ success: true });
+  return res
+    .status(200)
+    .send({ success: true, message: "Recipe successfully added" });
 });
 
 app.get("/allRecipes", async function(req, res) {
@@ -28,6 +30,36 @@ app.get("/allRecipes", async function(req, res) {
     .toArray();
 
   return res.status(200).send(foundRecipes);
+});
+
+app.get("/getSides", async function(req, res) {
+  const allSideRecipes = await recipes()
+    .aggregate([
+      {
+        $match: {
+          type: "side"
+        }
+      },
+      { $sample: { size: 7 } }
+    ])
+    .toArray();
+
+  return res.status(200).send(allSideRecipes);
+});
+
+app.get("/getMeals", async function(req, res) {
+  const allMealRecipes = await recipes()
+    .aggregate([
+      {
+        $match: {
+          type: "meal"
+        }
+      },
+      { $sample: { size: 7 } }
+    ])
+    .toArray();
+
+  return res.status(200).send(allMealRecipes);
 });
 
 app.listen(4000, function() {
