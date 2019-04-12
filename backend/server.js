@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-import { recipes, connect } from "../backend/helpers/db-helper";
+import { recipes, connect, user } from "../backend/helpers/db-helper";
+import { ObjectId } from "mongodb";
 
 let app = express();
 app.use(cors());
@@ -32,33 +33,96 @@ app.get("/allRecipes", async function(req, res) {
   return res.status(200).send(foundRecipes);
 });
 
+app.get("/getUser", async function(req, res) {
+  const foundUser = await user().findOne({ userId: req.query.userId });
+
+  return res.status(200).send(foundUser);
+});
+
+app.post("/updateUserRecipes", async function(req, res) {
+  console.log(req.body);
+  let userData = {
+    userId: req.body.userId,
+    userRecipes: {
+      meals: req.body.meals,
+      sides: req.body.sides
+    }
+  };
+  let db = await user();
+  db.findOneAndUpdate(
+    { userId: req.body.userId },
+    { $set: { userRecipes: userData.userRecipes } },
+    (error, result) => {
+      if (error) {
+        db.insertOne(userData, (err, result) => {
+          if (err) return res.status(500).send(err);
+        });
+        return res.status(200).send({ success: true });
+      }
+    }
+  );
+});
+
 app.get("/getSides", async function(req, res) {
-  const allSideRecipes = await recipes()
-    .aggregate([
-      {
-        $match: {
-          type: "side"
-        }
-      },
-      { $sample: { size: 7 } }
-    ])
-    .toArray();
+  let allSideRecipes = [];
+  if (req.query.sideIds) {
+    let ids = req.query.sideIds.split(",").map(id => ObjectId(id));
+    allSideRecipes = await recipes()
+      .aggregate([
+        {
+          $match: {
+            type: "Side",
+            _id: { $nin: ids }
+          }
+        },
+        { $sample: { size: 7 } }
+      ])
+      .toArray();
+  } else {
+    allSideRecipes = await recipes()
+      .aggregate([
+        {
+          $match: {
+            type: "Side"
+          }
+        },
+        { $sample: { size: 7 } }
+      ])
+      .toArray();
+  }
 
   return res.status(200).send(allSideRecipes);
 });
 
 app.get("/getMeals", async function(req, res) {
-  const allMealRecipes = await recipes()
-    .aggregate([
-      {
-        $match: {
-          type: "meal"
-        }
-      },
-      { $sample: { size: 7 } }
-    ])
-    .toArray();
-
+  let allMealRecipes = [];
+  if (req.query.mealIds) {
+    let ids = req.query.mealIds.split(",").map(id => ObjectId(id));
+    allMealRecipes = await recipes()
+      .aggregate([
+        {
+          $match: {
+            type: "Meal",
+            _id: {
+              $nin: ids
+            }
+          }
+        },
+        { $sample: { size: 7 } }
+      ])
+      .toArray();
+  } else {
+    allMealRecipes = await recipes()
+      .aggregate([
+        {
+          $match: {
+            type: "Meal"
+          }
+        },
+        { $sample: { size: 7 } }
+      ])
+      .toArray();
+  }
   return res.status(200).send(allMealRecipes);
 });
 
